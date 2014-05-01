@@ -81,6 +81,7 @@ define(function(require, exports, module) {
 
         this.positionFrom(this.getPosition.bind(this));
 
+        this.setOptions();
         _bindEvents.call(this);
     }
 
@@ -88,8 +89,9 @@ define(function(require, exports, module) {
         direction: Utility.Direction.Y,
         margin: 0,
         clipSize: undefined,
-        friction: 0.0001,
-        drag: 0.0001,
+        rails: true,
+        friction: 0.001,
+        drag: 0.001,
         edgeGrip: 0.5,
         edgePeriod: 300,
         edgeDamp: 1,
@@ -151,37 +153,18 @@ define(function(require, exports, module) {
             else if (velocity > speedLimit) velocity = speedLimit;
             this.setVelocity(velocity);
             this._touchVelocity = undefined;
-            this._needsPaginationCheck = true;
         }
     }
 
     function _bindEvents() {
         this._eventInput.bindThis(this);
-        this._eventInput.on('start', _handleStart);
-        this._eventInput.on('update', _handleMove);
-        this._eventInput.on('end', _handleEnd);
+        this.enable();
 
         this.on('edgeHit', function(data) {
             this._edgeSpringPosition = data.position;
         }.bind(this));
     }
 
-
-    LimitedScrollview.prototype.getPosition = function getPosition() {
-        return this._particle.getPosition1D();
-    };
-
-    LimitedScrollview.prototype.setPosition = function setPosition(x) {
-        this._particle.setPosition1D(x);
-    };
-
-    LimitedScrollview.prototype.getVelocity = function getVelocity() {
-        return this._touchCount ? this._touchVelocity : this._particle.getVelocity1D();
-    };
-
-    LimitedScrollview.prototype.setVelocity = function setVelocity(v) {
-        this._particle.setVelocity1D(v);
-    };
 
     function _detachAgents() {
         this._springState = SpringStates.NONE;
@@ -239,12 +222,52 @@ define(function(require, exports, module) {
         else return _sizeForDir.call(this, this._contextSize);
     }
 
+    LimitedScrollview.prototype.enable = function enable() {
+        this._eventInput.on('start', _handleStart);
+        this._eventInput.on('update', _handleMove);
+        this._eventInput.on('end', _handleEnd);
+    };
+
+    LimitedScrollview.prototype.disable = function disable() {
+        this._eventInput.removeListener('start', _handleStart);
+        this._eventInput.removeListener('update', _handleMove);
+        this._eventInput.removeListener('end', _handleEnd);
+    };
+
+    LimitedScrollview.prototype.getPosition = function getPosition() {
+        return this._particle.getPosition1D();
+    };
+
+    LimitedScrollview.prototype.setPosition = function setPosition(x) {
+        this._particle.setPosition1D(x);
+    };
+
+    LimitedScrollview.prototype.getVelocity = function getVelocity() {
+        return this._touchCount ? this._touchVelocity : this._particle.getVelocity1D();
+    };
+
+    LimitedScrollview.prototype.setVelocity = function setVelocity(v) {
+        this._particle.setVelocity1D(v);
+    };
+
     /**
      * Patches the LimitedScrollview instance's options with the passed-in ones.
      * @method setOptions
      * @param {Options} options An object of configurable options for the LimitedScrollview instance.
      */
     LimitedScrollview.prototype.setOptions = function setOptions(options) {
+        this.drag.setOptions({strength: this.options.drag});
+        this.friction.setOptions({strength: this.options.friction});
+
+        this.spring.setOptions({
+            period: this.options.edgePeriod,
+            dampingRatio: this.options.edgeDamp
+        });
+
+        this.sync.setOptions({
+            rails: this.options.rails,
+            direction: (this.options.direction === Utility.Direction.X) ? GenericSync.DIRECTION_X : GenericSync.DIRECTION_Y
+        });
         return this._optionsManager.setOptions(options);
     };
 
@@ -307,9 +330,53 @@ define(function(require, exports, module) {
         this._items = items;
     };
 
-    LimitedScrollview.prototype.howLong = function howLong() {
+    LimitedScrollview.prototype.getCurrentNodeIndex = function getCurrentNodeIndex() {
+        return this._currentItemIndex;
+    };
+
+    LimitedScrollview.prototype.getCurrentOffset = function getOffset() {
+        return this.getPosition() - this.howLong(0, this.getCurrentNodeIndex());
+    };
+
+    LimitedScrollview.prototype.isVisible = function isVisible(node) {
+        var displayedNodeIndices = this.displayedNodeIndices();
+        if (node >= displayedNodeIndices[0] && node <= displayedNodeIndices[1]) return true;
+        return false;
+    };
+
+    LimitedScrollview.prototype.onDragStart = function onDragStart(callback) {
+        this._eventInput.on('start', callback);
+    };
+
+    LimitedScrollview.prototype.onDragUpdate = function onDragStart(callback) {
+        this._eventInput.on('update', callback);
+    };
+
+    LimitedScrollview.prototype.onDragEnd = function onDragStart(callback) {
+        this._eventInput.on('end', callback);
+    };
+
+    LimitedScrollview.prototype.onComplete = function onDragStart(callback) {
+        this._eventOutput.on('complete', callback);
+    };
+
+    LimitedScrollview.prototype.displayedNodeIndices = function displayedNodeIndices() {
+        var displayArea = this.options.direction ? window.innerHeight : window.innerWidth;
+        var start = this.getCurrentNodeIndex();
+        var currentIndex = start;
+        var displayedNodeArea = this.getCurrentOffset();
+        while (displayedNodeArea < displayArea) {
+            displayedNodeArea += this._items[currentIndex].getSize()[this.options.direction];
+            currentIndex ++;
+        }
+        return [start, currentIndex];
+    }
+
+    LimitedScrollview.prototype.howLong = function howLong(start, end) {
+        start = start || 0;
+        if (end === undefined) end = this._items.length;
         var result = 0;
-        for (var i = 0; i < this._items.length; i++) {
+        for (var i = start; i < end; i++) {
             result += this._items[i].getSize()[this.options.direction];
         };
         return result;
@@ -421,6 +488,15 @@ define(function(require, exports, module) {
             this._eventOutput.emit('edgeHit', {
                 position: 0
             });
+        }
+
+        if (Math.abs(this.getVelocity()) < 0.001 && !this.stopped) {
+            this.stopped = true;
+            this._eventOutput.emit('complete');
+        }
+
+        if (this.stopped && Math.abs(this.getVelocity()) > 0.001) {
+            this.stopped = false;
         }
 
         // backwards
