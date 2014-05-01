@@ -152,7 +152,7 @@ define(function(require, exports, module) {
         var result = 0;
         for (var i = 0; i < this._items.length; i++) {
             result += this._items[i].getSize()[this.options.direction];
-        };
+        }
         return result;
     };
 
