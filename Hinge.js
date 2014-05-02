@@ -1,15 +1,14 @@
 define(function(require, exports, module) {
     var Utility          = require('famous/utilities/Utility');
     var OptionsManager   = require('famous/core/OptionsManager');
-    var RenderNode       = require('famous/core/RenderNode');
     var Modifier         = require('famous/core/Modifier');
     var Transform        = require('famous/core/Transform');
     var Transitionable   = require('famous/transitions/Transitionable');
 
     function Hinge(options) {
-        if (options) {
-            if (options.direction) options.direction = Hinge.dictionary[options.direction];
-            if (options.axis) options.axis = Hinge.dictionary[options.axis];
+        if (options && options.axis) {
+            options.direction = Hinge.direction[options.axis];
+            options.axis = Hinge.side[options.axis];
         }
 
         this.options = Object.create(Hinge.DEFAULT_OPTIONS);
@@ -23,13 +22,19 @@ define(function(require, exports, module) {
         _attachModifiers.call(this);
     };
 
-    Hinge.dictionary = {
+    Hinge.side = {
         1: 1,
-        'y': 0,
-        'x': 1,
         'left': 0,
         'top': 0,
         'right': 1,
+        'bottom': 1
+    };
+
+    Hinge.direction = {
+        1: 1,
+        'left': 0,
+        'right': 0,
+        'top': 1,
         'bottom': 1
     };
 
@@ -37,10 +42,7 @@ define(function(require, exports, module) {
         direction: Utility.Direction.Y,
         axis: 0,
         angle: 0,
-        transition:{
-            duration: 500,
-            curve: 'linear'
-        }
+        transition: false
     };
 
     function _attachModifiers() {
@@ -69,9 +71,11 @@ define(function(require, exports, module) {
         return {
             transform: this.rotateTransform(),
             target: {
-                origin: this.origin,
                 size: target.size,
-                target: target
+                origin: this.origin,
+                target: {
+                    target: target
+                }
             }
         }
     };
