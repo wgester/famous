@@ -26,7 +26,7 @@ define(function(require, exports, module) {
 
     Hinge.prototype.setOptions = function setOptions(options) {
         if (options.side) _getOriginFromSide.call(this, options.side);
-        if (options.angle) this._angle.set(options.angle);
+        if (options.angle !== undefined) this._angle.set(options.angle);
         if (options.transition) this.options.transition = options.transition;
     };
 
