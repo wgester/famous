@@ -33,8 +33,8 @@ define(function(require, exports, module) {
         this.options = Object.create(this.constructor.DEFAULT_OPTIONS);
         this._optionsManager = new OptionsManager(this.options);
         if (options) this._optionsManager.setOptions(options);
-
-        this._items = null;
+        
+        this._items = [];
         this._currentItemIndex = 0;
         this._position = 0;
 
@@ -319,15 +319,23 @@ define(function(require, exports, module) {
         if (this._positionGetter) this._position = this._positionGetter.call(this);
     };
 
-    /**
-     * Sets the collection of renderables under the LimitedScrollview instance's control.
-     *
-     * @method sequenceFrom
-     * @param {Array|ViewSequence} items Either an array of renderables or a Famous viewSequence.
-     * @chainable
-     */
-    LimitedScrollview.prototype.setItems = function setItems(items) {
-        this._items = items;
+    // *
+    //  * Sets the collection of renderables under the LimitedScrollview instance's control.
+    //  *
+    //  * @method sequenceFrom
+    //  * @param {Array} items Either an array of renderables.
+    //  * @chainable
+     
+    // LimitedScrollview.prototype.setItems = function setItems(items) {
+    //     this._items = items;
+    // };
+    
+    LimitedScrollview.prototype.addRenderable = function addRenderable(item) {
+        this._items.push(item);
+    };
+
+    LimitedScrollview.prototype.splice = function removeRenderable(index, howMany, renderables) {
+        this._items.splice(index, howMany, renderables);
     };
 
     LimitedScrollview.prototype.getCurrentNodeIndex = function getCurrentNodeIndex() {
@@ -335,7 +343,7 @@ define(function(require, exports, module) {
     };
 
     LimitedScrollview.prototype.getCurrentOffset = function getOffset() {
-        return this.getPosition() - this.howLong(0, this.getCurrentNodeIndex());
+        return this.getPosition() - this.getLength(0, this.getCurrentNodeIndex());
     };
 
     LimitedScrollview.prototype.isVisible = function isVisible(node) {
@@ -372,7 +380,7 @@ define(function(require, exports, module) {
         return [start, currentIndex];
     }
 
-    LimitedScrollview.prototype.howLong = function howLong(start, end) {
+    LimitedScrollview.prototype.getLength = function getLength(start, end) {
         start = start || 0;
         if (end === undefined) end = this._items.length;
         var result = 0;
@@ -476,8 +484,7 @@ define(function(require, exports, module) {
             offset += _output.call(this, this._items[currentIndex], offset, result);
             currentIndex++;
         }
-
-        if (!this._items[currentIndex] && offset - position <= clipSize) {
+        if (!this._items[this.currentIndex] && offset - position <= clipSize) {
             this._onEdge = 1;
             this._eventOutput.emit('edgeHit', {
                 position: offset - clipSize
@@ -490,8 +497,14 @@ define(function(require, exports, module) {
             });
         }
 
+        if (this._onEdge && !this._touchCount && !this._springSet) {
+            _setSpring.call(this, this._edgeSpringPosition, SpringStates.EDGE);
+            this._springSet = true;
+        }   
+
         if (Math.abs(this.getVelocity()) < 0.001 && !this.stopped) {
             this.stopped = true;
+            this._springSet = false;
             this._eventOutput.emit('complete');
         }
 
