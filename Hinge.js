@@ -3,12 +3,12 @@ define(function(require, exports, module) {
     var Transitionable   = require('famous/transitions/Transitionable');
 
     function Hinge(options) {
+        // state
+        this._angle  = new Transitionable(Hinge.DEFAULT_OPTIONS.angle);
+        this._origin = _getOriginFromSide.call(this, Hinge.DEFAULT_OPTIONS.side);
+
         this.options = Object.create(Hinge.DEFAULT_OPTIONS);
         if (options) this.setOptions(options);
-
-        // state
-        this._angle  = new Transitionable(this.options.angle);
-        this._origin = _getOriginFromSide.call(this, this.options.side);
     };
 
     Hinge.SIDE = {
@@ -20,7 +20,7 @@ define(function(require, exports, module) {
 
     Hinge.DEFAULT_OPTIONS = {
         angle : 0,
-        side  : Hinge.SIDE.LEFT,
+        side  : Hinge.SIDE.TOP,
         transition : false
     };
 
@@ -33,6 +33,10 @@ define(function(require, exports, module) {
     Hinge.prototype.setAngle = function(angle, transition, callback) {
         transition = transition || this.options.transition;
         this._angle.set(angle, transition, callback);
+    };
+
+    Hinge.prototype.getAngle = function() {
+        return this._angle.get();
     };
 
     function _getOriginFromSide(side){
@@ -70,7 +74,7 @@ define(function(require, exports, module) {
     }
 
     Hinge.prototype.modify = function modify(target) {
-        var transform = _getTransformFromAngle.call(this, this._angle.get());
+        var transform = _getTransformFromAngle.call(this, this.getAngle());
         var size = (target.getSize) ? target.getSize() : target.size || null;
         return {
             size : size,
