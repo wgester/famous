@@ -37,6 +37,7 @@ define(function(require, exports, module) {
         this._items = [];
         this._currentItemIndex = 0;
         this._position = 0;
+        this._index = 0;
 
         // used for shifting nodes
         this._positionOffset = 0;
@@ -99,6 +100,7 @@ define(function(require, exports, module) {
         pageDamp: 0.8,
         pageStopSpeed: 10,
         pageSwitchSpeed: 0.5,
+        pagination: false,
         speedLimit: 10
     };
 
@@ -163,6 +165,51 @@ define(function(require, exports, module) {
         this.on('edgeHit', function(data) {
             this._edgeSpringPosition = data.position;
         }.bind(this));
+    }
+
+    function _checkPage() {
+        var size  = this.getLength(this._index, this._index + 1);
+        if (this.getPosition() > this.getLength(0, this._index) + (0.5 * size)) {
+            this._index += 1;
+            if (this._index > this._items.length) this._index = this._items.length;
+            if (!this._touchCount) _nextPage.call(this);
+        } 
+        if (this.getPosition() < this.getLength(0, this._index) - (0.5 * size)){
+            this._index -= 1;
+            if (this._index < 0) this._index = 0;
+            if (!this._touchCount) _previousPage.call(this);
+        } 
+        if (!this._touchCount && !this.springSet) _setSpring.call(this, this.getLength(0, this._index), SpringStates.PAGE);
+        var velocity = this.getVelocity();
+        if (this._pageChange && (Math.abs(velocity) < 0.000001) && this.getPosition() === this._pageSpringPosition) {
+            _detachAgents.call(this);
+            this.setPosition(this._pageSpringPosition);
+            this.setVelocity(0);
+            this._eventOutput.emit('endPageTransition', this.getCurrentNodeIndex());
+            this._pageChange = 0;
+            this.springSet = false;
+        }
+    }
+
+    function _nextPage() {
+        if (!this.getLength(this._index - 1, this._index)) return;
+        if (Math.abs(this.getVelocity()) < 0.00001 && !this._springSet) {
+            _setSpring.call(this, this.getPosition() + this.getLength(this._index - 1, this._index) - this.getCurrentOffset(), SpringStates.PAGE);
+            this._springSet = true;
+            _attachAgents.call(this);
+        }
+        this._pageChange = 1;
+        this._eventOutput.emit('nextPage', this._index);
+    }
+
+    function _previousPage() {
+        if (!this.getLength(this._index, this._index + 1)) return;
+        if (!this.springSet && Math.abs(this.getVelocity()) < 0.00001) {
+            _setSpring.call(this, this.getPosition() - this.getCurrentOffset(), SpringStates.PAGE);
+            this._springSet = true;
+            _attachAgents.call(this);
+        }
+        this._eventOutput.emit('prevPage', this._index);
     }
 
 
@@ -385,7 +432,7 @@ define(function(require, exports, module) {
         if (end === undefined) end = this._items.length;
         var result = 0;
         for (var i = start; i < end; i++) {
-            result += this._items[i].getSize()[this.options.direction];
+            if (this._items[i]) result += this._items[i].getSize()[this.options.direction];
         };
         return result;
     };
@@ -512,6 +559,7 @@ define(function(require, exports, module) {
             this.stopped = false;
         }
 
+
         // backwards
         currentIndex = this._currentItemIndex - 1;
         offset = -this._positionOffset;
@@ -529,6 +577,7 @@ define(function(require, exports, module) {
             }
         }
 
+        if (this.options.pagination) _checkPage.call(this);
         _normalizeState.call(this);
         return result;
     }
