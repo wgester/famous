@@ -185,7 +185,7 @@ define(function(require, exports, module) {
             _detachAgents.call(this);
             this.setPosition(this._pageSpringPosition);
             this.setVelocity(0);
-            this._eventOutput.emit('endPageTransition', this.getCurrentNodeIndex());
+            this._eventOutput.emit('transitionComplete', this.getCurrentNodeIndex());
             this._pageChange = 0;
             this.springSet = false;
         }
@@ -199,7 +199,7 @@ define(function(require, exports, module) {
             _attachAgents.call(this);
         }
         this._pageChange = 1;
-        this._eventOutput.emit('nextPage', this._index);
+        this._eventOutput.emit('pageChange', 1);
     }
 
     function _previousPage() {
@@ -209,7 +209,7 @@ define(function(require, exports, module) {
             this._springSet = true;
             _attachAgents.call(this);
         }
-        this._eventOutput.emit('prevPage', this._index);
+        this._eventOutput.emit('pageChange', -1);
     }
 
 
@@ -228,7 +228,7 @@ define(function(require, exports, module) {
         if (springState === SpringStates.EDGE) {
             this._edgeSpringPosition = position;
             springOptions = {
-                anchor: [this._edgeSpringPosition, 0, 0],
+                anchor: [this._pageSpringPosition, 0, 0],
                 period: this.options.edgePeriod,
                 dampingRatio: this.options.edgeDamp
             };
@@ -381,6 +381,10 @@ define(function(require, exports, module) {
         this._items.push(item);
     };
 
+    LimitedScrollview.prototype.sequenceFrom = function sequenceFrom(items) {
+        this._items = items;
+    };
+
     LimitedScrollview.prototype.splice = function removeRenderable(index, howMany, renderables) {
         this._items.splice(index, howMany, renderables);
     };
@@ -412,7 +416,7 @@ define(function(require, exports, module) {
     };
 
     LimitedScrollview.prototype.onComplete = function onDragStart(callback) {
-        this._eventOutput.on('complete', callback);
+        this._eventOutput.on('transitionComplete', callback);
     };
 
     LimitedScrollview.prototype.displayedNodeIndices = function displayedNodeIndices() {
@@ -477,7 +481,8 @@ define(function(require, exports, module) {
         // reset edge detection on size change
         if (!this.options.clipSize && (size[0] !== this._contextSize[0] || size[1] !== this._contextSize[1])) {
             this._onEdge = 0;
-            this._contextSize = size;
+            this._contextSize[0] = size[0];
+            this._contextSize[1] = size[1];
 
             if (this.options.direction === Utility.Direction.X) {
                 this._size[0] = _getClipSize.call(this);
@@ -530,8 +535,9 @@ define(function(require, exports, module) {
         while (this._items[currentIndex] && offset - position < clipSize + this.options.margin) {
             offset += _output.call(this, this._items[currentIndex], offset, result);
             currentIndex++;
-        }
-        if (!this._items[this.currentIndex] && offset - position <= clipSize) {
+        } 
+        //problems w/clipSize
+        if (!this._items[currentIndex] && offset - position <= clipSize) {
             this._onEdge = 1;
             this._eventOutput.emit('edgeHit', {
                 position: offset - clipSize
@@ -552,7 +558,7 @@ define(function(require, exports, module) {
         if (Math.abs(this.getVelocity()) < 0.001 && !this.stopped) {
             this.stopped = true;
             this._springSet = false;
-            this._eventOutput.emit('complete');
+            this._eventOutput.emit('transitionComplete');
         }
 
         if (this.stopped && Math.abs(this.getVelocity()) > 0.001) {
