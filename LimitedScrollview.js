@@ -100,7 +100,7 @@ define(function(require, exports, module) {
         pageDamp: 0.8,
         pageStopSpeed: 10,
         pageSwitchSpeed: 0.5,
-        pagination: false,
+        paginated: false,
         speedLimit: 10
     };
 
