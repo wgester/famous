@@ -125,6 +125,7 @@ define(function(require, exports, module) {
         var delta = -event.delta;
 
         if (this._onEdge && event.slip) {
+            console.log(event.position)
             if ((velocity < 0 && this._onEdge < 0) || (velocity > 0 && this._onEdge > 0)) {
                 if (!this._earlyEnd) {
                     _handleEnd.call(this, event);
@@ -143,6 +144,7 @@ define(function(require, exports, module) {
     }
 
     function _handleEnd(event) {
+        console.log('ended', this._onEdge)
         this._touchCount = event.count || 0;
         if (!this._touchCount) {
             _detachAgents.call(this);
@@ -219,6 +221,7 @@ define(function(require, exports, module) {
     }
 
     function _attachAgents() {
+        console.log(this._springState)
         if (this._springState) this._physicsEngine.attach([this.spring], this._particle);
         else this._physicsEngine.attach([this.drag, this.friction], this._particle);
     }
@@ -228,7 +231,7 @@ define(function(require, exports, module) {
         if (springState === SpringStates.EDGE) {
             this._edgeSpringPosition = position;
             springOptions = {
-                anchor: [this._pageSpringPosition, 0, 0],
+                anchor: [this._edgeSpringPosition, 0, 0],
                 period: this.options.edgePeriod,
                 dampingRatio: this.options.edgeDamp
             };
@@ -249,6 +252,15 @@ define(function(require, exports, module) {
             _attachAgents.call(this);
         }
         this._springState = springState;
+    }
+
+    function _handleEdge(edgeDetected) {
+        if (edgeDetected) {
+            this.sync.setOptions({scale: this.options.edgeGrip});
+            if (!this._touchCount && this._springState !== SpringStates.EDGE) {
+                _setSpring.call(this, this._edgeSpringPosition, SpringStates.EDGE);
+            }
+        }
     }
 
     function _sizeForDir(size) {
@@ -584,6 +596,7 @@ define(function(require, exports, module) {
         }
 
         if (this.options.pagination) _checkPage.call(this);
+        _handleEdge.call(this, this._onEdge);
         _normalizeState.call(this);
         return result;
     }
