@@ -592,7 +592,7 @@ define(function(require, exports, module) {
             }
         }
 
-        if (this.options.pagination) _checkPage.call(this);
+        if (this.options.paginated) _checkPage.call(this);
         _handleEdge.call(this, this._onEdge);
         _normalizeState.call(this);
         return result;
