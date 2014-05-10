@@ -92,7 +92,7 @@ define(function(require, exports, module) {
         clipSize: undefined,
         rails: true,
         friction: 0.001,
-        drag: 0.001,
+        drag: 0.0001,
         edgeGrip: 0.5,
         edgePeriod: 300,
         edgeDamp: 1,
@@ -167,17 +167,17 @@ define(function(require, exports, module) {
         }.bind(this));
     }
 
-    function _checkPage() {
+    function _handlePagination() {
         var size  = this.getLength(this._index, this._index + 1);
         if (this.getPosition() > this.getLength(0, this._index) + (0.5 * size)) {
             this._index += 1;
             if (this._index > this._items.length) this._index = this._items.length;
-            if (!this._touchCount) _nextPage.call(this);
+            if (!this._touchCount) _goToNextPage.call(this);
         } 
         if (this.getPosition() < this.getLength(0, this._index) - (0.5 * size)){
             this._index -= 1;
             if (this._index < 0) this._index = 0;
-            if (!this._touchCount) _previousPage.call(this);
+            if (!this._touchCount) _goToPreviousPage.call(this);
         } 
         if (!this._touchCount && !this.springSet) _setSpring.call(this, this.getLength(0, this._index), SpringStates.PAGE);
         var velocity = this.getVelocity();
@@ -191,7 +191,7 @@ define(function(require, exports, module) {
         }
     }
 
-    function _nextPage() {
+    function _goToNextPage() {
         if (!this.getLength(this._index - 1, this._index)) return;
         if (Math.abs(this.getVelocity()) < 0.00001 && !this._springSet) {
             _setSpring.call(this, this.getPosition() + this.getLength(this._index - 1, this._index) - this.getCurrentOffset(), SpringStates.PAGE);
@@ -199,17 +199,17 @@ define(function(require, exports, module) {
             _attachAgents.call(this);
         }
         this._pageChange = 1;
-        this._eventOutput.emit('pageChange', 1);
+        this._eventOutput.emit('pageChange', {direction: 1});
     }
 
-    function _previousPage() {
+    function _goToPreviousPage() {
         if (!this.getLength(this._index, this._index + 1)) return;
         if (!this.springSet && Math.abs(this.getVelocity()) < 0.00001) {
             _setSpring.call(this, this.getPosition() - this.getCurrentOffset(), SpringStates.PAGE);
             this._springSet = true;
             _attachAgents.call(this);
         }
-        this._eventOutput.emit('pageChange', -1);
+        this._eventOutput.emit('pageChange', {direction:-1});
     }
 
 
@@ -592,7 +592,7 @@ define(function(require, exports, module) {
             }
         }
 
-        if (this.options.paginated) _checkPage.call(this);
+        if (this.options.paginated) _handlePagination.call(this);
         _handleEdge.call(this, this._onEdge);
         _normalizeState.call(this);
         return result;
