@@ -552,7 +552,7 @@ define(function(require, exports, module) {
                 position: offset - clipSize
             });
         }
-        else if (!this._items[this._currentItemIndex - 1] && position <= 0) {
+        else if (!this._items[this._currentItemIndex - 1] && position <= 0 && this.initialized) {
             this._onEdge = -1;
             this._eventOutput.emit('edgeHit', {
                 position: 0
@@ -592,6 +592,7 @@ define(function(require, exports, module) {
             }
         }
 
+        if (!this.initialized) this.initialized = true;
         if (this.options.paginated) _handlePagination.call(this);
         _handleEdge.call(this, this._onEdge);
         _normalizeState.call(this);
