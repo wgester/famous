@@ -122,7 +122,7 @@ define(function(require, exports, module) {
 
     function _handleMove(event) {
         var velocity = -event.velocity;
-        var delta = -event.delta;
+        var delta = 2 * -event.delta;
 
         if (this._onEdge && event.slip) {
             if ((velocity < 0 && this._onEdge < 0) || (velocity > 0 && this._onEdge > 0)) {
@@ -295,6 +295,8 @@ define(function(require, exports, module) {
     };
 
     LimitedScrollview.prototype.setPosition = function setPosition(x) {
+        _detachAgents.call(this);
+        this._physicsEngine.attach([this.drag, this.friction], this._particle);
         this._particle.setPosition1D(x);
     };
 
@@ -394,7 +396,7 @@ define(function(require, exports, module) {
         this._items = items;
     };
 
-    LimitedScrollview.prototype.splice = function removeRenderable(index, howMany, renderables) {
+    LimitedScrollview.prototype.splice = function splice(index, howMany, renderables) {
         this._items.splice(index, howMany, renderables);
     };
 
@@ -545,14 +547,14 @@ define(function(require, exports, module) {
             offset += _output.call(this, this._items[currentIndex], offset, result);
             currentIndex++;
         } 
-        //problems w/clipSize
+        
         if (!this._items[currentIndex] && offset - position <= clipSize) {
             this._onEdge = 1;
             this._eventOutput.emit('edgeHit', {
                 position: offset - clipSize
             });
         }
-        else if (!this._items[this._currentItemIndex - 1] && position <= 0 && this.initialized) {
+        else if (!this._items[this._currentItemIndex - 1] && position <= 0) {
             this._onEdge = -1;
             this._eventOutput.emit('edgeHit', {
                 position: 0
@@ -592,7 +594,6 @@ define(function(require, exports, module) {
             }
         }
 
-        if (!this.initialized) this.initialized = true;
         if (this.options.paginated) _handlePagination.call(this);
         _handleEdge.call(this, this._onEdge);
         _normalizeState.call(this);
