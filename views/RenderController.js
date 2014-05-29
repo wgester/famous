@@ -41,9 +41,11 @@ define(function(require, exports, module) {
         this.inTransformMap = RenderController.DefaultMap.transform;
         this.inOpacityMap = RenderController.DefaultMap.opacity;
         this.inOriginMap = RenderController.DefaultMap.origin;
+        this.inAlignMap = RenderController.DefaultMap.align;
         this.outTransformMap = RenderController.DefaultMap.transform;
         this.outOpacityMap = RenderController.DefaultMap.opacity;
         this.outOriginMap = RenderController.DefaultMap.origin;
+        this.inAlignMap = RenderController.DefaultMap.align;
 
         this._output = [];
     }
@@ -63,7 +65,8 @@ define(function(require, exports, module) {
         opacity: function(progress) {
             return progress;
         },
-        origin: null
+        origin: null,
+        align: null
     };
 
     function _mappedState(map, state) {
@@ -165,6 +168,22 @@ define(function(require, exports, module) {
         return this;
     };
 
+    RenderController.prototype.outAlignFrom = function outOriginFrom(align) {
+        if (origin instanceof Function) this.outOriginMap = origin;
+        else if (origin && origin.get) this.outOriginMap = origin.get.bind(origin);
+        else throw new Error('inOriginFrom takes only function or getter object');
+        //TODO: tween origin
+        return this;
+    };
+
+    RenderController.prototype.inAlignFrom = function inOriginFrom(origin) {
+        if (origin instanceof Function) this.inOriginMap = origin;
+        else if (origin && origin.get) this.inOriginMap = origin.get.bind(origin);
+        else throw new Error('inOriginFrom takes only function or getter object');
+        //TODO: tween origin
+        return this;
+    };
+
     /**
      * Show displays the targeted renderable with a transition and an optional callback to
      * execute afterwards.
@@ -220,7 +239,8 @@ define(function(require, exports, module) {
             var modifier = new Modifier({
                 transform: this.inTransformMap ? _mappedState.bind(this, this.inTransformMap, state) : null,
                 opacity: this.inOpacityMap ? _mappedState.bind(this, this.inOpacityMap, state) : null,
-                origin: this.inOriginMap ? _mappedState.bind(this, this.inOriginMap, state) : null
+                origin: this.inOriginMap ? _mappedState.bind(this, this.inOriginMap, state) : null,
+                align: this.inAlignMap ? _mappedState.bind(this, this.inOriginMap, state) : null
             });
             var node = new RenderNode();
             node.add(modifier).add(renderable);
@@ -262,6 +282,7 @@ define(function(require, exports, module) {
         modifier.transformFrom(this.outTransformMap ? _mappedState.bind(this, this.outTransformMap, state) : null);
         modifier.opacityFrom(this.outOpacityMap ? _mappedState.bind(this, this.outOpacityMap, state) : null);
         modifier.originFrom(this.outOriginMap ? _mappedState.bind(this, this.outOriginMap, state) : null);
+        modifier.alignFrom(this.outAlignMap ? _mappedState.bind(this, this.outAlignMap, state) : null);
 
         if (this._outgoingRenderables.indexOf(renderable) < 0) this._outgoingRenderables.push(renderable);
 

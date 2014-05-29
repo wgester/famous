@@ -52,12 +52,15 @@ define(function(require, exports, module) {
         inTransform: Transform.scale(0.001, 0.001, 0.001),
         inOpacity: 0,
         inOrigin: [0.5, 0.5],
+        inAlign: null,
         outTransform: Transform.scale(0.001, 0.001, 0.001),
         outOpacity: 0,
         outOrigin: [0.5, 0.5],
+        otAlign: null,
         showTransform: Transform.identity,
         showOpacity: 1,
         showOrigin: [0.5, 0.5],
+        showAlign: null,
         inTransition: true,
         outTransition: true,
         overlap: false
@@ -103,13 +106,15 @@ define(function(require, exports, module) {
         var stateItem = {
             transform: new TransitionableTransform(this.options.inTransform),
             origin: new Transitionable(this.options.inOrigin),
-            opacity: new Transitionable(this.options.inOpacity)
+            opacity: new Transitionable(this.options.inOpacity),
+            align: new Transitionable(this.options.inAlign)
         };
 
         var transform = new Modifier({
             transform: stateItem.transform,
             opacity: stateItem.opacity,
-            origin: stateItem.origin
+            origin: stateItem.origin,
+            align: stateItem.align
         });
         var node = new RenderNode();
         node.add(transform).add(renderable);
@@ -123,6 +128,7 @@ define(function(require, exports, module) {
         stateItem.transform.set(this.options.showTransform, transition, _cb);
         stateItem.opacity.set(this.options.showOpacity, transition, _cb);
         stateItem.origin.set(this.options.showOrigin, transition, _cb);
+        stateItem.align.set(this.options.showAlign, transition, _cb);
     };
 
     /**
@@ -155,6 +161,7 @@ define(function(require, exports, module) {
         stateItem.transform.set(this.options.outTransform, transition, _cb);
         stateItem.opacity.set(this.options.outOpacity, transition, _cb);
         stateItem.origin.set(this.options.outOrigin, transition, _cb);
+        stateItem.align.set(this.options.outAlign, transition, _cb);
     };
 
     /**
