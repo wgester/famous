@@ -56,7 +56,7 @@ define(function(require, exports, module) {
         outTransform: Transform.scale(0.001, 0.001, 0.001),
         outOpacity: 0,
         outOrigin: [0.5, 0.5],
-        otAlign: null,
+        outAlign: null,
         showTransform: Transform.identity,
         showOpacity: 1,
         showOrigin: [0.5, 0.5],
@@ -122,7 +122,7 @@ define(function(require, exports, module) {
         this.states.push(stateItem);
         this.transforms.push(transform);
 
-        var _cb = callback ? Utility.after(3, callback) : undefined;
+        var _cb = callback ? Utility.after(4, callback) : undefined;
 
         if (!transition) transition = this.options.inTransition;
         stateItem.transform.set(this.options.showTransform, transition, _cb);
