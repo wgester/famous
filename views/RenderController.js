@@ -169,17 +169,17 @@ define(function(require, exports, module) {
     };
 
     RenderController.prototype.outAlignFrom = function outOriginFrom(align) {
-        if (origin instanceof Function) this.outOriginMap = origin;
-        else if (origin && origin.get) this.outOriginMap = origin.get.bind(origin);
-        else throw new Error('inOriginFrom takes only function or getter object');
+        if (align instanceof Function) this.outAlignMap = align;
+        else if (align && align.get) this.outAlignMap = align.get.bind(align);
+        else throw new Error('outAlignFrom takes only function or getter object');
         //TODO: tween origin
         return this;
     };
 
-    RenderController.prototype.inAlignFrom = function inOriginFrom(origin) {
-        if (origin instanceof Function) this.inOriginMap = origin;
-        else if (origin && origin.get) this.inOriginMap = origin.get.bind(origin);
-        else throw new Error('inOriginFrom takes only function or getter object');
+    RenderController.prototype.inAlignFrom = function inOriginFrom(align) {
+        if (align instanceof Function) this.inAlignMap = align;
+        else if (align && align.get) this.inAlignMap = align.get.bind(align);
+        else throw new Error('inAlignFrom takes only function or getter object');
         //TODO: tween origin
         return this;
     };
@@ -240,7 +240,7 @@ define(function(require, exports, module) {
                 transform: this.inTransformMap ? _mappedState.bind(this, this.inTransformMap, state) : null,
                 opacity: this.inOpacityMap ? _mappedState.bind(this, this.inOpacityMap, state) : null,
                 origin: this.inOriginMap ? _mappedState.bind(this, this.inOriginMap, state) : null,
-                align: this.inAlignMap ? _mappedState.bind(this, this.inOriginMap, state) : null
+                align: this.inAlignMap ? _mappedState.bind(this, this.inAlignMap, state) : null
             });
             var node = new RenderNode();
             node.add(modifier).add(renderable);
