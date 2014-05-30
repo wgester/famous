@@ -40,9 +40,6 @@ define(function(require, exports, module) {
 
         this._onEdge = 0; // -1 for top, 1 for bottom
 
-        this.group = new Group();
-        this.group.add({render: _innerRender.bind(this)});
-
         this._entityId = Entity.register(this);
         this._size = [undefined, undefined];
         this._contextSize = [undefined, undefined];
@@ -58,7 +55,6 @@ define(function(require, exports, module) {
         direction: Utility.Direction.Y,
         margin: 0,
         clipSize: undefined,
-        groupScroll: false
     };
 
     function _sizeForDir(size) {
@@ -86,13 +82,6 @@ define(function(require, exports, module) {
      */
     Scroller.prototype.setOptions = function setOptions(options) {
         this._optionsManager.setOptions(options);
-
-        if (this.options.groupScroll) {
-          this.group.pipe(this._eventOutput);
-        }
-        else {
-          this.group.unpipe(this._eventOutput);
-        }
     };
 
     /**
@@ -113,17 +102,13 @@ define(function(require, exports, module) {
      * @param {Function} fn A function that takes an offset and returns a transform.
      * @param {Function} [masterFn]
      */
-    Scroller.prototype.outputFrom = function outputFrom(fn, masterFn) {
+    Scroller.prototype.outputFrom = function outputFrom(fn) {
         if (!fn) {
             fn = function(offset) {
                 return (this.options.direction === Utility.Direction.X) ? Transform.translate(offset, 0) : Transform.translate(0, offset);
             }.bind(this);
-            if (!masterFn) masterFn = fn;
         }
         this._outputFunction = fn;
-        this._masterOutputFunction = masterFn ? masterFn : function(offset) {
-            return Transform.inverse(fn(-offset));
-        };
     };
 
     /**
@@ -210,37 +195,6 @@ define(function(require, exports, module) {
             }
         }
 
-        var scrollTransform = this._masterOutputFunction(-this._position);
-
-        return {
-            transform: Transform.multiply(transform, scrollTransform),
-            size: size,
-            opacity: opacity,
-            origin: origin,
-            target: this.group.render()
-        };
-    };
-
-    function _normalizeState() {
-        var nodeSize = _sizeForDir.call(this, this._node.getSize());
-        var nextNode = this._node && this._node.getNext ? this._node.getNext() : null;
-        while (nextNode && this._position + this._positionOffset >= nodeSize) {
-            this._positionOffset -= nodeSize;
-            this._node = nextNode;
-            nodeSize = _sizeForDir.call(this, this._node.getSize());
-            nextNode = this._node && this._node.getNext ? this._node.getNext() : null;
-        }
-        var prevNode = this._node && this._node.getPrevious ? this._node.getPrevious() : null;
-        while (prevNode && this._position + this._positionOffset < 0) {
-            var prevNodeSize = _sizeForDir.call(this, prevNode.getSize());
-            this._positionOffset += prevNodeSize;
-            this._node = prevNode;
-            prevNode = this._node && this._node.getPrevious ? this._node.getPrevious() : null;
-        }
-    }
-
-    function _innerRender() {
-        var size = null;
         var position = this._position;
         var result = [];
 
@@ -301,7 +255,31 @@ define(function(require, exports, module) {
         }
 
         _normalizeState.call(this);
-        return result;
+
+        return {
+            size: size,
+            opacity: opacity,
+            origin: origin,
+            target: result
+        };
+    };
+
+    function _normalizeState() {
+        var nodeSize = _sizeForDir.call(this, this._node.getSize());
+        var nextNode = this._node && this._node.getNext ? this._node.getNext() : null;
+        while (nextNode && this._position + this._positionOffset >= nodeSize) {
+            this._positionOffset -= nodeSize;
+            this._node = nextNode;
+            nodeSize = _sizeForDir.call(this, this._node.getSize());
+            nextNode = this._node && this._node.getNext ? this._node.getNext() : null;
+        }
+        var prevNode = this._node && this._node.getPrevious ? this._node.getPrevious() : null;
+        while (prevNode && this._position + this._positionOffset < 0) {
+            var prevNodeSize = _sizeForDir.call(this, prevNode.getSize());
+            this._positionOffset += prevNodeSize;
+            this._node = prevNode;
+            prevNode = this._node && this._node.getPrevious ? this._node.getPrevious() : null;
+        }
     }
 
     module.exports = Scroller;
