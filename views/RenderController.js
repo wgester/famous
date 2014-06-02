@@ -45,7 +45,7 @@ define(function(require, exports, module) {
         this.outTransformMap = RenderController.DefaultMap.transform;
         this.outOpacityMap = RenderController.DefaultMap.opacity;
         this.outOriginMap = RenderController.DefaultMap.origin;
-        this.inAlignMap = RenderController.DefaultMap.align;
+        this.outAlignMap = RenderController.DefaultMap.align;
 
         this._output = [];
     }
@@ -81,7 +81,7 @@ define(function(require, exports, module) {
      *  the transform used in transitioning in renderables.
      *
      * @method inTransformFrom
-     * @param {Function|Transitionable} transform  A function that returns a transform from outside closure, or a
+     * @param {Function|Transitionable} transform  Either a function that returns a transform from outside closure, or a
      * a transitionable that manages a full transform (a sixteen value array).
      * @chainable
      */
@@ -96,7 +96,7 @@ define(function(require, exports, module) {
     /**
      * inOpacityFrom sets the accessor for the state of the opacity used in transitioning in renderables.
      * @method inOpacityFrom
-     * @param {Function|Transitionable} opacity  A function that returns an opacity from outside closure, or a
+     * @param {Function|Transitionable} opacity Either a function that returns an opacity from outside closure, or a
      * a transitionable that manages opacity (a number between zero and one).
      * @chainable
      */
@@ -111,7 +111,7 @@ define(function(require, exports, module) {
     /**
      * inOriginFrom sets the accessor for the state of the origin used in transitioning in renderables.
      * @method inOriginFrom
-     * @param {Function|Transitionable} origin A function that returns an origin from outside closure, or a
+     * @param {Function|Transitionable} origin Either a function that returns an origin from outside closure, or a
      * a transitionable that manages origin (a two value array of numbers between zero and one).
      * @chainable
      */
@@ -124,9 +124,24 @@ define(function(require, exports, module) {
     };
 
     /**
+     * inAlignFrom sets the accessor for the state of the align used in transitioning in renderables.
+     * @method inAlignFrom
+     * @param {Function|Transitionable} origin Either a function that returns an Align from outside closure, or a
+     * a transitionable that manages Align (a two value array of numbers between zero and one).
+     * @chainable
+     */
+    RenderController.prototype.inAlignFrom = function inOriginFrom(align) {
+        if (align instanceof Function) this.inAlignMap = align;
+        else if (align && align.get) this.inAlignMap = align.get.bind(align);
+        else throw new Error('inAlignFrom takes only function or getter object');
+        //TODO: tween origin
+        return this;
+    };
+
+    /**
      * outTransformFrom sets the accessor for the state of the transform used in transitioning out renderables.
      * @method show
-     * @param {Function|Transitionable} transform  A function that returns a transform from outside closure, or a
+     * @param {Function|Transitionable} transform  Either a function that returns a transform from outside closure, or a
      * a transitionable that manages a full transform (a sixteen value array).
      * @chainable
      */
@@ -141,7 +156,7 @@ define(function(require, exports, module) {
     /**
      * outOpacityFrom sets the accessor for the state of the opacity used in transitioning out renderables.
      * @method inOpacityFrom
-     * @param {Function|Transitionable} opacity  A function that returns an opacity from outside closure, or a
+     * @param {Function|Transitionable} opacity  Either a function that returns an opacity from outside closure, or a
      * a transitionable that manages opacity (a number between zero and one).
      * @chainable
      */
@@ -156,7 +171,7 @@ define(function(require, exports, module) {
     /**
      * outOriginFrom sets the accessor for the state of the origin used in transitioning out renderables.
      * @method inOriginFrom
-     * @param {Function|Transitionable} origin A function that returns an origin from outside closure, or a
+     * @param {Function|Transitionable} origin Either a function that returns an origin from outside closure, or a
      * a transitionable that manages origin (a two value array of numbers between zero and one).
      * @chainable
      */
@@ -168,18 +183,17 @@ define(function(require, exports, module) {
         return this;
     };
 
+    /**
+     * outAlignFrom sets the accessor for the state of the align used in transitioning out renderables.
+     * @method outAlignFrom
+     * @param {Function|Transitionable} align Either a function that returns an align from outside closure, or a
+     * a transitionable that manages align (a two value array of numbers between zero and one).
+     * @chainable
+     */
     RenderController.prototype.outAlignFrom = function outOriginFrom(align) {
         if (align instanceof Function) this.outAlignMap = align;
         else if (align && align.get) this.outAlignMap = align.get.bind(align);
         else throw new Error('outAlignFrom takes only function or getter object');
-        //TODO: tween origin
-        return this;
-    };
-
-    RenderController.prototype.inAlignFrom = function inOriginFrom(align) {
-        if (align instanceof Function) this.inAlignMap = align;
-        else if (align && align.get) this.inAlignMap = align.get.bind(align);
-        else throw new Error('inAlignFrom takes only function or getter object');
         //TODO: tween origin
         return this;
     };
