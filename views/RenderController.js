@@ -112,7 +112,7 @@ define(function(require, exports, module) {
      * inOriginFrom sets the accessor for the state of the origin used in transitioning in renderables.
      * @method inOriginFrom
      * @param {Function|Transitionable} origin Either a function that returns an origin from outside closure, or a
-     * a transitionable that manages origin (a two value array of numbers between zero and one).
+     * a transitionable that manages origin (a two value array of numbers usually between zero and one).
      * @chainable
      */
     RenderController.prototype.inOriginFrom = function inOriginFrom(origin) {
@@ -127,7 +127,7 @@ define(function(require, exports, module) {
      * inAlignFrom sets the accessor for the state of the align used in transitioning in renderables.
      * @method inAlignFrom
      * @param {Function|Transitionable} origin Either a function that returns an Align from outside closure, or a
-     * a transitionable that manages Align (a two value array of numbers between zero and one).
+     * a transitionable that manages Align (a two value array of numbers usually between zero and one).
      * @chainable
      */
     RenderController.prototype.inAlignFrom = function inOriginFrom(align) {
@@ -172,7 +172,7 @@ define(function(require, exports, module) {
      * outOriginFrom sets the accessor for the state of the origin used in transitioning out renderables.
      * @method inOriginFrom
      * @param {Function|Transitionable} origin Either a function that returns an origin from outside closure, or a
-     * a transitionable that manages origin (a two value array of numbers between zero and one).
+     * a transitionable that manages origin (a two value array of numbers usually between zero and one).
      * @chainable
      */
     RenderController.prototype.outOriginFrom = function outOriginFrom(origin) {
@@ -187,7 +187,7 @@ define(function(require, exports, module) {
      * outAlignFrom sets the accessor for the state of the align used in transitioning out renderables.
      * @method outAlignFrom
      * @param {Function|Transitionable} align Either a function that returns an align from outside closure, or a
-     * a transitionable that manages align (a two value array of numbers between zero and one).
+     * a transitionable that manages align (a two value array of numbers usually between zero and one).
      * @chainable
      */
     RenderController.prototype.outAlignFrom = function outOriginFrom(align) {
