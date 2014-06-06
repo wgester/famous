@@ -64,7 +64,9 @@ define(function(require, exports, module) {
     HeaderFooterLayout.DEFAULT_OPTIONS = {
         direction: HeaderFooterLayout.DIRECTION_Y,
         headerSize: undefined,
+        headerFloat: false,
         footerSize: undefined,
+        footerFloat: false,
         defaultHeaderSize: 0,
         defaultFooterSize: 0
     };
@@ -95,9 +97,10 @@ define(function(require, exports, module) {
         return nodeSize ? nodeSize[this.options.direction] : defaultSize;
     }
 
-    function _outputTransform(offset) {
-        if (this.options.direction === HeaderFooterLayout.DIRECTION_X) return Transform.translate(offset, 0, 0);
-        else return Transform.translate(0, offset, 0);
+    function _outputTransform(offset, z) {
+        z = z || 0;
+        if (this.options.direction === HeaderFooterLayout.DIRECTION_X) return Transform.translate(offset, 0, z);
+        else return Transform.translate(0, offset, z);
     }
 
     function _finalSize(directionSize, size) {
@@ -122,22 +125,23 @@ define(function(require, exports, module) {
 
         var headerSize = (this.options.headerSize !== undefined) ? this.options.headerSize : _resolveNodeSize.call(this, this.header, this.options.defaultHeaderSize);
         var footerSize = (this.options.footerSize !== undefined) ? this.options.footerSize : _resolveNodeSize.call(this, this.footer, this.options.defaultFooterSize);
-        var contentSize = size[this.options.direction] - headerSize - footerSize;
+        var contentSize = size[this.options.direction] - (this.options.headerFloat ? 0 : headerSize) - (this.options.footerFloat ? 0 : footerSize);
 
         if (size) transform = Transform.moveThen([-size[0]*origin[0], -size[1]*origin[1], 0], transform);
 
         var result = [
             {
+                transform: Transform.translate(0, 0, 1),
                 size: _finalSize.call(this, headerSize, size),
                 target: this.header.render()
             },
             {
-                transform: _outputTransform.call(this, headerSize),
+                transform: _outputTransform.call(this, (this.options.headerFloat ? 0 : headerSize)),
                 size: _finalSize.call(this, contentSize, size),
                 target: this.content.render()
             },
             {
-                transform: _outputTransform.call(this, headerSize + contentSize),
+                transform: _outputTransform.call(this, context.size[this.options.direction] - footerSize, 1),
                 size: _finalSize.call(this, footerSize, size),
                 target: this.footer.render()
             }
