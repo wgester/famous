@@ -13,6 +13,9 @@ define(function(require, exports, module) {
     var Spring = require('famous/physics/forces/Spring');
 
     var GenericSync = require('famous/inputs/GenericSync');
+    var ScrollSync = require('famous/inputs/ScrollSync');
+    var TouchSync = require('famous/inputs/TouchSync');
+    GenericSync.register({scroll : ScrollSync, touch : TouchSync});
 
     /**
      * LimitedScrollview lays out a collection of renderables, and will browse through them based on 
@@ -69,7 +72,7 @@ define(function(require, exports, module) {
         this.drag = new Drag({forceFunction: Drag.FORCE_FUNCTIONS.QUADRATIC});
         this.friction = new Drag({forceFunction: Drag.FORCE_FUNCTIONS.LINEAR});
 
-        this.sync = new GenericSync({direction : this.options.direction});
+        this.sync = new GenericSync(['scroll', 'touch'], {direction : this.options.direction});
 
         this._eventInput = new EventHandler();
         this._eventOutput = new EventHandler();
