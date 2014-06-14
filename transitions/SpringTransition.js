@@ -40,7 +40,7 @@ define(function(require, exports, module) {
         this.particle = new Particle();
 
         this.PE.addBody(this.particle);
-        this.PE.attach(this.spring, this.particle);
+        this.agentId = this.PE.attach(this.spring, this.particle);
     }
 
     SpringTransition.SUPPORTS_MULTIPLE = 3;
@@ -87,15 +87,15 @@ define(function(require, exports, module) {
     };
 
     function _getEnergy() {
-        return this.particle.getEnergy() + this.spring.getEnergy(this.particle);
+        return this.PE.getEnergy();
     }
 
-    function _setParticlePosition(p) {
-        this.particle.setPosition(p);
+    function _setParticlePosition(position) {
+        this.particle.setPosition(position);
     }
 
-    function _setParticleVelocity(v) {
-        this.particle.setVelocity(v);
+    function _setParticleVelocity(velocity) {
+        this.particle.setVelocity(velocity);
     }
 
     function _getParticlePosition() {

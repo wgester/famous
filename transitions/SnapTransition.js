@@ -84,7 +84,7 @@ define(function(require, exports, module) {
     };
 
     function _getEnergy() {
-        return this.particle.getEnergy() + this.spring.getEnergy(this.particle);
+        return this.PE.getEnergy();
     }
 
     function _setAbsoluteRestTolerance() {
@@ -107,12 +107,12 @@ define(function(require, exports, module) {
         this.PE.sleep();
     }
 
-    function _setParticlePosition(p) {
-        this.particle.position.set(p);
+    function _setParticlePosition(position) {
+        this.particle.position.set(position);
     }
 
-    function _setParticleVelocity(v) {
-        this.particle.velocity.set(v);
+    function _setParticleVelocity(velocity) {
+        this.particle.velocity.set(velocity);
     }
 
     function _getParticlePosition() {
