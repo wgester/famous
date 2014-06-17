@@ -25,7 +25,7 @@ define(function(require, exports, module) {
     };
 
     Hinge.prototype.setOptions = function setOptions(options) {
-        if (options.side) _getOriginFromSide.call(this, options.side);
+        if (options.side) this._origin = _getOriginFromSide.call(this, options.side);
         if (options.angle !== undefined) this._angle.set(options.angle);
         if (options.transition) this.options.transition = options.transition;
     };
@@ -75,14 +75,10 @@ define(function(require, exports, module) {
 
     Hinge.prototype.modify = function modify(target) {
         var transform = _getTransformFromAngle.call(this, this.getAngle());
-        var size = (target.getSize) ? target.getSize() : target.size || null;
         return {
-            size : size,
-            target : {
-                origin : this._origin,
-                transform : transform,
-                target : target
-            }
+            origin : this._origin,
+            transform : transform,
+            target : target
         };
     };
 
