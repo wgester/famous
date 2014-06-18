@@ -95,6 +95,15 @@ define(function(require, exports, module) {
         }
     }
 
+    function _checkTrueSizeSections() {
+        var direction = this.options.direction;
+        for (var i = 0; i < this._nodes.length; i++) {
+            if (this._cachedLengths[i] !== this._nodes[i].getSize()[direction]) return true;
+        }
+
+        return false;
+    }
+
     /**
      * Generate a render spec from the contents of this component.
      *
@@ -168,7 +177,7 @@ define(function(require, exports, module) {
         var length = parentSize[direction];
         var size;
 
-        if (length !== this._cachedTotalLength || this._ratiosDirty || this._ratios.isActive() || direction !== this._cachedDirection) {
+        if (length !== this._cachedTotalLength || this._ratiosDirty || this._ratios.isActive() || direction !== this._cachedDirection || _checkTrueSizeSections.call(this)) {
             _reflow.call(this, ratios, length, direction);
 
             if (length !== this._cachedTotalLength) this._cachedTotalLength = length;
