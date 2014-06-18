@@ -26,17 +26,16 @@ define(function(require, exports, module) {
     function SnapTransition(state) {
         state = state || 0;
 
-        this.endState  = new Vector(state);
+        this.endState = new Vector(state);
         this.initState = new Vector();
 
-        this._dimensions       = 1;
-        this._restTolerance    = 1e-10;
-        this._absRestTolerance = this._restTolerance;
-        this._callback         = undefined;
+        this._dimensions = 1;
+        this._restTolerance = 1e-10;
+        this._callback = undefined;
 
-        this.PE       = new PE();
+        this.PE = new PE({sleepTolerance : this._restTolerance});
         this.particle = new Particle();
-        this.spring   = new Spring({anchor : this.endState});
+        this.spring = new Spring({anchor : this.endState});
 
         this.PE.addBody(this.particle);
         this.PE.attach(this.spring, this.particle);
@@ -83,28 +82,17 @@ define(function(require, exports, module) {
         velocity : 0
     };
 
-    function _getEnergy() {
-        return this.PE.getEnergy();
-    }
-
     function _setAbsoluteRestTolerance() {
         var distance = this.endState.sub(this.initState).normSquared();
-        this._absRestTolerance = (distance === 0)
+        var absRestTolerance = (distance === 0)
             ? this._restTolerance
             : this._restTolerance * distance;
+        this.PE.setOptions({sleepTolerance : absRestTolerance});
     }
 
     function _setTarget(target) {
         this.endState.set(target);
         _setAbsoluteRestTolerance.call(this);
-    }
-
-    function _wake() {
-        this.PE.wake();
-    }
-
-    function _sleep() {
-        this.PE.sleep();
     }
 
     function _setParticlePosition(position) {
@@ -148,19 +136,12 @@ define(function(require, exports, module) {
     }
 
     function _update() {
-        if (this.PE.isSleeping()) {
+        if (!this.isActive()) {
             if (this._callback) {
                 var cb = this._callback;
                 this._callback = undefined;
                 cb();
             }
-            return;
-        }
-
-        if (_getEnergy.call(this) < this._absRestTolerance) {
-            _setParticlePosition.call(this, this.endState);
-            _setParticleVelocity.call(this, [0,0,0]);
-            _sleep.call(this);
         }
     }
 
@@ -214,7 +195,7 @@ define(function(require, exports, module) {
      * @return {Boolean}
      */
     SnapTransition.prototype.isActive = function isActive() {
-        return !this.PE.isSleeping();
+        return this.PE.isActive();
     };
 
     /**
@@ -258,7 +239,6 @@ s     *
             ? state.length
             : 0;
 
-        _wake.call(this);
         _setupDefinition.call(this, definition);
         _setTarget.call(this, state);
         _setCallback.call(this, callback);
