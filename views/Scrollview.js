@@ -91,6 +91,7 @@ define(function(require, exports, module) {
         this._touchVelocity = undefined;
         this._earlyEnd = false;
         this._needsPaginationCheck = false;
+        this._size = null;
 
         this._scroller = new Scroller();
         this._scroller.positionFrom(this.getPosition.bind(this));
@@ -475,6 +476,10 @@ define(function(require, exports, module) {
 
         _normalizeState.call(this);
         _handleEdge.call(this, this._scroller.onEdge());
+        if (this._size !== _nodeSizeForDirection.call(this, this._node)) {
+            this._needsPaginationCheck = true;
+            this._size = _nodeSizeForDirection.call(this, this._node);
+        }
         if (this.options.paginated) _handlePagination.call(this);
 
         return this._scroller.render();
