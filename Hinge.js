@@ -3,12 +3,12 @@ define(function(require, exports, module) {
     var Transitionable   = require('famous/transitions/Transitionable');
 
     function Hinge(options) {
-        // state
-        this._angle  = new Transitionable(Hinge.DEFAULT_OPTIONS.angle);
-        this._origin = _getOriginFromSide.call(this, Hinge.DEFAULT_OPTIONS.side);
-
         this.options = Object.create(Hinge.DEFAULT_OPTIONS);
         if (options) this.setOptions(options);
+
+        // state
+        this._angle  = new Transitionable(this.options.angle);
+        this._origin = _getOriginFromSide.call(this, this.options.side);
     };
 
     Hinge.SIDE = {
@@ -20,16 +20,19 @@ define(function(require, exports, module) {
 
     Hinge.DEFAULT_OPTIONS = {
         angle : 0,
-        side  : Hinge.SIDE.TOP,
+        side : Hinge.SIDE.TOP,
         transition : false
     };
 
     Hinge.prototype.setOptions = function setOptions(options) {
         if (options.side) {
-            this._origin = _getOriginFromSide.call(this, options.side);
             this.options.side = options.side;
+            _getOriginFromSide.call(this, options.side);
         }
-        if (options.angle !== undefined) this._angle.set(options.angle);
+        if (options.angle !== undefined) {
+            this.options.angle = options.angle;
+            this._angle.set(options.angle);
+        }
         if (options.transition) this.options.transition = options.transition;
     };
 
@@ -42,20 +45,24 @@ define(function(require, exports, module) {
         return this._angle.get();
     };
 
+    Hinge.prototype.add = function(target){
+        this._target = target;
+    };
+
     function _getOriginFromSide(side){
         var origin;
         switch (side){
             case Hinge.SIDE.TOP:
-                origin = [.5,0];
+                origin = [0,0];
                 break;
             case Hinge.SIDE.RIGHT:
-                origin = [1,.5];
+                origin = [1,0];
                 break;
             case Hinge.SIDE.BOTTOM:
-                origin = [.5,1];
+                origin = [0,1];
                 break;
             case Hinge.SIDE.LEFT:
-                origin = [0,.5];
+                origin = [0,0];
                 break;
         }
         return origin;
@@ -76,15 +83,17 @@ define(function(require, exports, module) {
         return transform;
     }
 
-    Hinge.prototype.modify = function modify(target) {
+    Hinge.prototype.render = function render() {
         var transform = _getTransformFromAngle.call(this, this.getAngle());
-        var size = (target.getSize) ? target.getSize() : target.size || null;
+        var target = this._target;
+        var size = target.getSize();
+
         return {
             size: size,
             target: {
                 origin : this._origin,
                 transform : transform,
-                target : target
+                target : target.render()
             }
         };
     };
