@@ -173,12 +173,12 @@ define(function(require, exports, module) {
     function _handlePagination() {
         var size  = this.getLength(this._index, this._index + 1);
         if (this.getPosition() > this.getLength(0, this._index) + (0.5 * size)) {
-            this._index += 1;
+            this._eventOutput.emit('pageChange', {index: ++this._index, direction: 1});
             if (this._index > this._items.length) this._index = this._items.length;
             if (!this._touchCount) _goToNextPage.call(this);
         } 
         if (this.getPosition() < this.getLength(0, this._index) - (0.5 * size)){
-            this._index -= 1;
+            this._eventOutput.emit('pageChange', {index: --this._index, direction: -1});
             if (this._index < 0) this._index = 0;
             if (!this._touchCount) _goToPreviousPage.call(this);
         } 
@@ -188,7 +188,6 @@ define(function(require, exports, module) {
             _detachAgents.call(this);
             this.setPosition(this._pageSpringPosition);
             this.setVelocity(0);
-            this._eventOutput.emit('transitionComplete', this.getCurrentNodeIndex());
             this._pageChange = 0;
             this.springSet = false;
         }
@@ -202,7 +201,6 @@ define(function(require, exports, module) {
             _attachAgents.call(this);
         }
         this._pageChange = 1;
-        this._eventOutput.emit('pageChange', {direction: 1});
     }
 
     function _goToPreviousPage() {
@@ -212,7 +210,6 @@ define(function(require, exports, module) {
             this._springSet = true;
             _attachAgents.call(this);
         }
-        this._eventOutput.emit('pageChange', {direction:-1});
     }
 
 
@@ -421,16 +418,12 @@ define(function(require, exports, module) {
         this._eventInput.on('start', callback);
     };
 
-    LimitedScrollview.prototype.onDragUpdate = function onDragStart(callback) {
+    LimitedScrollview.prototype.onDragUpdate = function onDragUpdate(callback) {
         this._eventInput.on('update', callback);
     };
 
-    LimitedScrollview.prototype.onDragEnd = function onDragStart(callback) {
+    LimitedScrollview.prototype.onDragEnd = function onDragEnd(callback) {
         this._eventInput.on('end', callback);
-    };
-
-    LimitedScrollview.prototype.onComplete = function onDragStart(callback) {
-        this._eventOutput.on('transitionComplete', callback);
     };
 
     LimitedScrollview.prototype.displayedNodeIndices = function displayedNodeIndices() {
@@ -572,7 +565,7 @@ define(function(require, exports, module) {
         if (Math.abs(this.getVelocity()) < 0.001 && !this.stopped) {
             this.stopped = true;
             this._springSet = false;
-            this._eventOutput.emit('transitionComplete');
+            this._eventOutput.emit('transitionComplete', this._index);
         }
 
         if (this.stopped && Math.abs(this.getVelocity()) > 0.001) {
