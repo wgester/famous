@@ -1,7 +1,6 @@
 define(function(require, exports, module) {
     var Transform        = require('famous/core/Transform');
     var Transitionable   = require('famous/transitions/Transitionable');
-    var Hinge            = require('famous/modifiers/Hinge');
 
     function Accordion(options) {
         this.options = Object.create(Accordion.DEFAULT_OPTIONS);
@@ -9,8 +8,7 @@ define(function(require, exports, module) {
 
         // state
         this._angles = new Transitionable(this.options.angle);
-        this._nodes = [];
-        this._origin = [0,0];
+        this._nodes = []
     };
 
     Accordion.DIRECTION_X = 0;
@@ -29,11 +27,9 @@ define(function(require, exports, module) {
     };
 
     Accordion.prototype.setAngle = function(index, angle, transition, callback) {
-        transition = transition || this.options.transition;
-        if (this._angles.isActive) this._angles.halt();
-        var angles = this.getAngles();
+        var angles = this.getAngles().slice();
         angles[index] = angle;
-        this._angles.set(angles, transition, callback);
+        this.setAngles(angles, transition, callback);
     };
 
     Accordion.prototype.setAngles = function(angles, transition, callback) {
@@ -53,60 +49,86 @@ define(function(require, exports, module) {
     Accordion.prototype.render = function render() {
         var result = [];
 
-
         var pivotIndex = this.options.pivotIndex;
         var angles = this.getAngles();
         var nodes = this._nodes;
         var angle = 0;
-
+        var totalLength = 0;
+        var maxTotalLength = 0;
+        var pivotLength = 0;
         var node;
 
-        debugger
-        var offset = [0,0,0];
+        for (var i = 0; i < pivotIndex; i++){
+            angle = angles[i];
+            length = nodes[i].getSize()[1];
+            pivotLength += Math.cos(angle) * length;
+        }
+
+        var offset = [0, pivotLength, 0];
         for (var i = pivotIndex - 1; i >= 0; i--){
             node = nodes[i];
             angle = angles[i];
 
             var size = node.getSize();
+            var length = size[1];
 
-            offset[1] -= Math.cos(angle) * size[1];
-            offset[2] -= Math.sin(angle) * size[1];
+            offset[1] -= Math.cos(angle) * length;
+            offset[2] -= Math.sin(angle) * length;
 
             var transform = Transform.thenMove(Transform.rotateX(angle), offset);
+
+            totalLength += Math.cos(angle) * length;
+            maxTotalLength = Math.max(maxTotalLength, totalLength);
 
             result.push({
                 size : size,
                 target : {
-                    origin : this._origin,
+                    origin : [0,0],
                     transform : transform,
                     target : node.render()
                 }
             });
         }
 
-        offset = [0,0,0];
+        offset = [0,pivotLength,0];
         for (var i = pivotIndex; i < nodes.length; i++){
             node = nodes[i];
             angle = angles[i];
 
             var size = node.getSize();
+            var length = size[1];
+
             var transform = Transform.thenMove(Transform.rotateX(angle), offset);
 
             result.push({
                 size : size,
                 target : {
-                    origin : this._origin,
+                    origin : [0,0],
                     transform : transform,
                     target : node.render()
                 }
             });
 
-            offset[1] += Math.cos(angle) * size[1];
-            offset[2] += Math.sin(angle) * size[1];
+            offset[1] += Math.cos(angle) * length;
+            offset[2] += Math.sin(angle) * length;
+
+            totalLength += Math.cos(angle) * length;
+            maxTotalLength = Math.max(maxTotalLength, totalLength);
+
         }
 
-        return result;
+        totalLength = Math.max(maxTotalLength, totalLength);
+        this._size = [size[0], totalLength];
+
+        return {
+            size : this._size,
+            target : result
+        };
     };
+
+    Accordion.prototype.getSize = function(){
+        return this._size;
+    }
 
     module.exports = Accordion;
 });
