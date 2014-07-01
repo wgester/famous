@@ -40,6 +40,8 @@ define(function(require, exports, module) {
     function DrawerLayout(options) {
         this.options = Object.create(DrawerLayout.DEFAULT_OPTIONS);
         this._optionsManager = new OptionsManager(this.options);
+
+        this._drawerTransform = Transform.behind;
         if (options) this.setOptions(options);
 
         this._position = new Transitionable(0);
@@ -75,7 +77,8 @@ define(function(require, exports, module) {
         drawerLength : 0,
         velocityThreshold : 0,
         positionThreshold : 0,
-        transition : true
+        transition : true,
+        drawerTransform : Transform.behind
     };
 
     function _getDirectionFromSide(side) {
@@ -159,6 +162,9 @@ define(function(require, exports, module) {
         if (options.side !== undefined) {
             this._direction = _getDirectionFromSide(options.side);
             this._orientation = _getOrientationFromSide(options.side);
+        }
+        if (options.depth !== undefined) {
+            this._drawerTransform = Transform.translate(0, 0, options.depth);
         }
     };
 
@@ -298,7 +304,7 @@ define(function(require, exports, module) {
 
         return [
             {
-                transform : Transform.behind,
+                transform : this._drawerTransform,
                 target: this.drawer.render()
             },
             {
