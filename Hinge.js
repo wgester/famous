@@ -9,7 +9,7 @@ define(function(require, exports, module) {
         // state
         this._angle  = new Transitionable(this.options.angle);
         this._origin = _getOriginFromSide.call(this, this.options.side);
-    };
+    }
 
     Hinge.SIDE = {
         'TOP'    : 0,
@@ -45,11 +45,11 @@ define(function(require, exports, module) {
         return this._angle.get();
     };
 
-    Hinge.prototype.add = function(target){
+    Hinge.prototype.add = function(target) {
         this._target = target;
     };
 
-    function _getOriginFromSide(side){
+    function _getOriginFromSide(side) {
         var origin;
         switch (side){
             case Hinge.SIDE.TOP:
@@ -68,7 +68,7 @@ define(function(require, exports, module) {
         return origin;
     }
 
-    function _getTransformFromAngle(angle){
+    function _getTransformFromAngle(angle) {
         var transform;
         switch (this.options.side){
             case Hinge.SIDE.TOP:
