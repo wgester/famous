@@ -71,7 +71,7 @@ define(function(require, exports, module) {
             node = this._nodes[i];
 
             if (typeof ratio !== 'number') {
-                if(node.getSize()) flexLength -= node.getSize()[direction] || 0;
+                if (node.getSize()) flexLength -= node.getSize()[direction] || 0;
             }
             else
                 ratioSum += ratio;
