@@ -18,7 +18,7 @@ define(function(require, exports, module) {
     GenericSync.register({scroll : ScrollSync, touch : TouchSync});
 
     /**
-     * LimitedScrollview lays out a collection of renderables, and will browse through them based on 
+     * LimitedScrollview lays out a collection of renderables, and will browse through them based on
      * accesed position. LimitedScrollview also broadcasts an 'edgeHit' event, with a position property of the location of the edge,
      * when you've hit the 'edges' of it's renderable collection.
      * @class LimitedScrollview
@@ -36,7 +36,7 @@ define(function(require, exports, module) {
         this.options = Object.create(this.constructor.DEFAULT_OPTIONS);
         this._optionsManager = new OptionsManager(this.options);
         if (options) this._optionsManager.setOptions(options);
-        
+
         this._items = [];
         this._currentItemIndex = 0;
         this._position = 0;
@@ -176,12 +176,12 @@ define(function(require, exports, module) {
             this._index += 1;
             if (this._index > this._items.length) this._index = this._items.length;
             if (!this._touchCount) _goToNextPage.call(this);
-        } 
+        }
         if (this.getPosition() < this.getLength(0, this._index) - (0.5 * size)){
             this._index -= 1;
             if (this._index < 0) this._index = 0;
             if (!this._touchCount) _goToPreviousPage.call(this);
-        } 
+        }
         if (!this._touchCount && !this.springSet) _setSpring.call(this, this.getLength(0, this._index), SpringStates.PAGE);
         var velocity = this.getVelocity();
         if (this._pageChange && (Math.abs(velocity) < 0.000001) && this.getPosition() === this._pageSpringPosition) {
@@ -214,7 +214,6 @@ define(function(require, exports, module) {
         }
         this._eventOutput.emit('pageChange', {direction:-1});
     }
-
 
     function _detachAgents() {
         this._springState = SpringStates.NONE;
@@ -345,7 +344,7 @@ define(function(require, exports, module) {
      * Allows you to overwrite the way LimitedScrollview lays out it's renderables. LimitedScrollview will
      * pass an offset into the function. By default the LimitedScrollview instance just translates each node
      * in it's direction by the passed-in offset.
-     * LimitedScrollview will translate each renderable down 
+     * LimitedScrollview will translate each renderable down
      * @method outputFrom
      * @param {Function} fn A function that takes an offset and returns a transform.
      * @param {Function} [masterFn]
@@ -386,11 +385,11 @@ define(function(require, exports, module) {
     //  * @method sequenceFrom
     //  * @param {Array} items Either an array of renderables.
     //  * @chainable
-     
+
     // LimitedScrollview.prototype.setItems = function setItems(items) {
     //     this._items = items;
     // };
-    
+
     LimitedScrollview.prototype.addRenderable = function addRenderable(item) {
         this._items.push(item);
     };
@@ -443,7 +442,7 @@ define(function(require, exports, module) {
             currentIndex ++;
         }
         return [start, currentIndex];
-    }
+    };
 
     LimitedScrollview.prototype.getLength = function getLength(start, end) {
         start = start || 0;
@@ -451,7 +450,7 @@ define(function(require, exports, module) {
         var result = 0;
         for (var i = start; i < end; i++) {
             if (this._items[i]) result += this._items[i].getSize()[this.options.direction];
-        };
+        }
         return result;
     };
 
@@ -549,8 +548,8 @@ define(function(require, exports, module) {
         while (this._items[currentIndex] && offset - position < clipSize + this.options.margin) {
             offset += _output.call(this, this._items[currentIndex], offset, result);
             currentIndex++;
-        } 
-        
+        }
+
         if (!this._items[currentIndex] && offset - position <= clipSize) {
             this._onEdge = 1;
             this._eventOutput.emit('edgeHit', {
@@ -567,7 +566,7 @@ define(function(require, exports, module) {
         if (this._onEdge && !this._touchCount && !this._springSet) {
             _setSpring.call(this, this._edgeSpringPosition, SpringStates.EDGE);
             this._springSet = true;
-        }   
+        }
 
         if (Math.abs(this.getVelocity()) < 0.001 && !this.stopped) {
             this.stopped = true;
@@ -578,7 +577,6 @@ define(function(require, exports, module) {
         if (this.stopped && Math.abs(this.getVelocity()) > 0.001) {
             this.stopped = false;
         }
-
 
         // backwards
         currentIndex = this._currentItemIndex - 1;
