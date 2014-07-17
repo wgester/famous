@@ -54,7 +54,7 @@ define(function(require, exports, module) {
     Scroller.DEFAULT_OPTIONS = {
         direction: Utility.Direction.Y,
         margin: 0,
-        clipSize: undefined,
+        clipSize: undefined
     };
 
     function _sizeForDir(size) {
