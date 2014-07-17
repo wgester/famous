@@ -111,8 +111,8 @@ define(function(require, exports, module) {
     };
 
     ContextualSequentialLayout.prototype.getSave = function() {
-        return this.save
-    }
+        return this.save;
+    };
 
     /**
      * Generate a render spec from the contents of this component.
@@ -134,7 +134,7 @@ define(function(require, exports, module) {
 
         var direction = this.options.direction;
         var offset = 0;
-        
+
         var result = [];
 
         var currentNode = this._items;
@@ -142,16 +142,16 @@ define(function(require, exports, module) {
 
         while (currentNode) {
             var item = currentNode.get();
-            if(!item) break;
+            if (!item) break;
 
             // console.log(i)
             var itemSize;
             if (item.getSize) {
                 itemSize = item.getSize();
                 // console.log('if: ', itemSize)
-                if (!itemSize) itemSize = [0, 0]
+                if (!itemSize) itemSize = [0, 0];
             }
-            else{
+            else {
                 itemSize = this.options.defaultItemSize;
                 // console.log('else: ', itemSize)
             }
@@ -172,7 +172,7 @@ define(function(require, exports, module) {
             transform: parentTransform,
             opacity: parentOpacity,
             target: result
-        }
+        };
 
         return {
             size: parentSize,
