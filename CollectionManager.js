@@ -10,7 +10,7 @@ define(function(require, exports, module) {
 
         if (array) this._array = array;
         this._index = 0;
-    };
+    }
 
     CollectionManager.prototype.sequenceFrom = function(array) {
         this._array = array;
@@ -19,7 +19,7 @@ define(function(require, exports, module) {
     CollectionManager.prototype.push = function(renderable) {
         this._array.push(renderable);
     };
-    
+
     CollectionManager.prototype.pop = function() {
         var removed = this._array.pop();
         if (this._index === this._array.length - 1) {
@@ -28,7 +28,7 @@ define(function(require, exports, module) {
         }
         return removed;
     };
-    
+
     CollectionManager.prototype.shift = function() {
         var removed = this._array.shift();
 
@@ -45,11 +45,14 @@ define(function(require, exports, module) {
     };
 
     CollectionManager.prototype.splice = function(start, howMany) {
+        var index;
+        var nodeSize;
+        var i;
         var renderables = Array.prototype.slice.call(arguments, 2, arguments.length);
         if (start <= this._index && start + howMany > this._index) {
-            var index = start;
-            var nodeSize = [0, 0];
-            for (var i = 0; i < index - start; i++) {
+            index = start;
+            nodeSize = [0, 0];
+            for (i = 0; i < index - start; i++) {
                 nodeSize[0] -= this._array[i].getSize()[0];
                 nodeSize[1] -= this._array[i].getSize()[1];
             }
@@ -57,13 +60,13 @@ define(function(require, exports, module) {
             if ((this._array.length - howMany + renderables.length) < 0) this._index = -1;
             this._eventHandler.emit('change', {index: this._index, size: nodeSize});
         } else if (start + howMany <= this._index) {
-            var nodeSize = [0, 0];
-            var index = this._index - howMany + renderables.length;
-            for (var i = start; i < howMany; i++) {
+            nodeSize = [0, 0];
+            index = this._index - howMany + renderables.length;
+            for (i = start; i < howMany; i++) {
                 nodeSize[0] -= this._array[i].getSize()[0];
                 nodeSize[1] -= this._array[i].getSize()[1];
             }
-            for (var i = 0; i < renderables.length; i++) {
+            for (i = 0; i < renderables.length; i++) {
                 nodeSize[0] += renderables[i].getSize()[0];
                 nodeSize[1] += renderables[i].getSize()[1];
             }
@@ -81,7 +84,7 @@ define(function(require, exports, module) {
 
     CollectionManager.prototype.setIndex = function(index) {
         this._index = index;
-    }
+    };
 
     CollectionManager.prototype.getIndex = function getIndex() {
         return this._index;
@@ -89,7 +92,7 @@ define(function(require, exports, module) {
 
     CollectionManager.prototype.get = function get(index) {
         return this._array[index];
-    }
+    };
 
     // CollectionManager.prototype.swap = function(firstIndex, secondIndex) {
     //     this._array.splice()
