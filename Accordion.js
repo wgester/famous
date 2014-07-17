@@ -10,7 +10,7 @@ define(function(require, exports, module) {
 
         this.options = Object.create(Accordion.DEFAULT_OPTIONS);
         if (options) this.setOptions(options);
-    };
+    }
 
     Accordion.DIRECTION_X = 0;
     Accordion.DIRECTION_Y = 1;
@@ -57,7 +57,7 @@ define(function(require, exports, module) {
         return this._angles.get();
     };
 
-    Accordion.prototype.sequenceFrom = function(nodes){
+    Accordion.prototype.sequenceFrom = function(nodes) {
         this._nodes = nodes;
         _computePivotOffset.call(this);
     };
@@ -93,7 +93,8 @@ define(function(require, exports, module) {
         var angle = 0;
         var totalLength = 0;
         var maxTotalLength = 0;
-        var node, pivotOffset;
+        var node;
+        var pivotOffset;
 
         var offset = [0, 0, 0];
         for (var i = 0; i < nodes.length; i++){
@@ -141,9 +142,9 @@ define(function(require, exports, module) {
         };
     };
 
-    Accordion.prototype.getSize = function(){
+    Accordion.prototype.getSize = function() {
         return this._size;
-    }
+    };
 
     module.exports = Accordion;
 });
